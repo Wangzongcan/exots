@@ -35,19 +35,24 @@ The system consists of two main components communicating via a Unix Domain Socke
 
 ### TypeScript Side
 ```typescript
-import { Exots } from 'exots';
+import { Server } from 'exots'
 
-const rpc = new Exots({
-  // Define functions to expose
-  add: (a: number, b: number) => a + b,
-  renderComponent: async (props: any) => {
-    // Complex logic (e.g., SSR)
-    return "<html>...</html>";
+// 1. Initialize the server with exposed functions
+const server = new Server({
+  add: (params: { a: number; b: number }) => params.a + params.b,
+  render: async (props: any) => {
+    // Perform complex operations
+    return `<div>${props.title}</div>`
   }
-});
+})
 
-// Listen on a Unix Socket file
-rpc.listen('/tmp/exots.sock');
+// 2. Start listening
+server.listen({
+  socket: '/tmp/exots.sock',
+  pid: '/tmp/exots.pid'
+}).then(() => {
+  console.log('RPC Server listening on /tmp/exots.sock')
+})
 ```
 
 ### Ruby Side

@@ -1,0 +1,30 @@
+{
+  "name": "exots",
+  "version": "0.1.0",
+  "description": "Exots Node.js Server",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "ipc",
+    "socket",
+    "rpc"
+  ],
+  "author": "sunteya",
+  "homepage": "https://github.com/sunteya/exots",
+  "license": "ISC",
+  "dependencies": {
+    "json-rpc-2.0": "^1.7.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.14",
+    "@types/node": "^20.11.19",
+    "typescript": "^5.3.3"
+  }
+}

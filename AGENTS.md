@@ -1,29 +1,9 @@
-# Project Structure
+# Exots Agents Guide
 
-This project is organized as a monorepo containing both the Node.js implementation and the Ruby implementation.
+This repository contains two main components:
 
-## Directory Layout
+1.  **npm/**: Node.js Server
+    - See `npm/AGENTS.md` for development instructions.
 
-```text
-exots/
-├── npm/                 # Node.js Package Source
-│   ├── src/             # TypeScript source code
-│   │   ├── index.ts     # Entry point
-│   │   └── server.ts    # HTTP/UDS Server implementation
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── gem/                 # Ruby Gem Source
-│   ├── lib/
-│   │   ├── exots.rb     # Gem entry point
-│   │   └── exots/
-│   │       └── client.rb # Client implementation
-│   └── exots.gemspec
-│
-└── README.md            # Project Documentation
-```
-
-## Module Responsibilities
-
-- **npm/**: Handles the "Server" side. Responsible for socket lifecycle management (creation, binding, cleanup) and request dispatching.
-- **gem/**: Handles the "Client" side. Responsible for socket connection, request serialization, and response parsing.
+2.  **gem/**: Ruby Client
+    - See `gem/AGENTS.md` (if available) or standard Ruby guidelines.
