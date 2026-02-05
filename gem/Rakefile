@@ -1,0 +1,18 @@
+require "bundler/gem_tasks"
+
+task :pack => :build
+
+task :build => :copy_assets
+
+task :copy_assets do
+  FileUtils.cp "../LICENSE", "."
+  FileUtils.cp "../README.md", "."
+end
+
+task :clean_assets do
+  FileUtils.rm ["LICENSE", "README.md"], force: true
+end
+
+# Ensure cleanup happens even if build fails, or explicitly call clean_assets
+# For now, let's just make build depend on copy. Users can run `git clean -fdx` or similar if they want super clean,
+# but we also added them to .gitignore so they won't pollute git status.

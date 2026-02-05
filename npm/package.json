@@ -1,7 +1,7 @@
 {
   "name": "exots",
   "version": "0.1.0",
-  "description": "Exots Node.js Server",
+  "description": "High-performance IPC bridge for executing TypeScript/JavaScript functions from Ruby",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -9,6 +9,8 @@
     "format": "biome format --write .",
     "lint": "biome lint .",
     "check": "biome check .",
+    "prepack": "pnpm run build && cp ../LICENSE . && cp ../README.md .",
+    "postpack": "rm LICENSE README.md",
     "prepublishOnly": "pnpm run build"
   },
   "keywords": [
@@ -16,8 +18,14 @@
     "socket",
     "rpc"
   ],
-  "author": "sunteya",
+  "author": "sunteya <sunteya@gmail.com>",
+  "repository": "sunteya/exots",
   "homepage": "https://github.com/sunteya/exots",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "license": "ISC",
   "dependencies": {
     "json-rpc-2.0": "^1.7.1",

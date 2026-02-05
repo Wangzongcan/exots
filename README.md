@@ -48,13 +48,8 @@ const server = new Server({
   }
 })
 
-// 2. Start listening using injected environment variables
-server.listen({
-  socket: process.env.EXOTS_SOCKET,
-  pid: process.env.EXOTS_PID
-}).then(() => {
-  console.log('RPC Server ready')
-})
+// 2. Start the server (automatically handles arguments and environment variables)
+server.run(process.argv)
 ```
 
 ### 2. Ruby Side
