@@ -12,12 +12,13 @@ module Exots
       @socket_path = socket_path
     end
 
-    def call(method, params = {})
+    def call(method, *args)
       id = SecureRandom.uuid
+
       payload = {
         jsonrpc: '2.0',
         method: method,
-        params: params,
+        params: args,
         id: id
       }
 

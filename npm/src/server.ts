@@ -1,8 +1,8 @@
 import * as fs from "node:fs"
 import * as http from "node:http"
 import * as net from "node:net"
-import minimist from "minimist"
 import { JSONRPCServer } from "json-rpc-2.0"
+import minimist from "minimist"
 
 export interface ListenOptions {
   socket: string
@@ -12,14 +12,16 @@ export interface ListenOptions {
 export class Server {
   server: http.Server
   rpc: JSONRPCServer
-  isClosing: boolean = false
+  isClosing = false
   socketPath?: string
   pidFile?: string
 
-  constructor(methods: Record<string, Function>) {
+  // biome-ignore lint/suspicious/noExplicitAny: Generic RPC method handler needs to accept any arguments
+  constructor(methods: Record<string, (...args: any[]) => any>) {
     this.rpc = new JSONRPCServer()
     Object.entries(methods).forEach(([name, fn]) => {
-      this.rpc.addMethod(name, (params) => fn(params))
+      // biome-ignore lint/suspicious/noExplicitAny: RPC params are untyped by definition here
+      this.rpc.addMethod(name, (params) => fn(...(params as any[])))
     })
 
     this.server = http.createServer((req, res) => this.handle(req, res))

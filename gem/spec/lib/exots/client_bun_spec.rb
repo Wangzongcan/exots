@@ -40,5 +40,10 @@ RSpec.describe Exots::Client do
       sum = context.call('add', a: 10, b: 20)
       expect(sum).to eq(30)
     end
+
+    it 'can pass multiple parameters' do
+      sum = context.call('sum', 10, 20)
+      expect(sum).to eq(30)
+    end
   end
 end

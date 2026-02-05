@@ -4,13 +4,13 @@ const server = new Server({
   ping: () => "pong",
   echo: ({ msg }) => msg,
   add: ({ a, b }) => a + b,
+  sum: (a, b) => a + b,
   error_method: () => {
-    throw new Error("Something went wrong");
+    throw new Error("Something went wrong")
   },
   slow_method: async () => {
-    return new Promise(resolve => setTimeout(() => resolve("done"), 100));
-  }
-});
+    return new Promise((resolve) => setTimeout(() => resolve("done"), 100))
+  },
+})
 
-server.run(process.argv);
- 
+server.run(process.argv)
