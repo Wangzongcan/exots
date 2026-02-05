@@ -58,17 +58,20 @@ server.listen({
 ```
 
 ### 2. Ruby Side
-Use the runner to spawn the process and call functions.
+Use the client to spawn the process and call functions.
 
 ```ruby
 require 'exots'
 
-# 1. Initialize the runner (defaults to using 'node')
-runner = Exots::Runner.new("plugin.js", command: "node")
+# 1. Initialize the client
+client = Exots::Client.new(
+  script_path: "plugin.js",
+  socket_path: Rails.root.join("tmp/sockets/exots.sock")
+)
 
 begin
   # 2. Start the process and connect
-  context = runner.start
+  context = client.start
 
   # 3. Call functions transparently
   sum = context.call("add", a: 5, b: 3)
@@ -81,6 +84,6 @@ begin
 
 ensure
   # 4. Clean shutdown
-  runner.stop
+  client.stop
 end
 ```

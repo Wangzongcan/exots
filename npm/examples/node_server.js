@@ -1,4 +1,4 @@
-const { Server } = require("../../../npm/dist");
+const { Server } = require("../dist")
 
 const server = new Server({
   ping: () => "pong",

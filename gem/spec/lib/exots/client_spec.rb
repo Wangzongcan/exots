@@ -3,28 +3,28 @@
 require 'spec_helper'
 require 'tmpdir'
 
-RSpec.describe Exots::Runner do
+RSpec.describe Exots::Client do
   describe 'Integration' do
     # Adjust path to fixtures relative to this file or use absolute
-    let(:script_path) { File.expand_path('../../fixtures/test_server.js', __dir__) }
+    let(:script_path) { File.expand_path('../../../../npm/examples/node_server.js', __dir__) }
     let(:tmp_dir) { Dir.mktmpdir('exots-spec-') }
     let(:socket_path) { File.join(tmp_dir, 'rpc.sock') }
     let(:pid_path) { File.join(tmp_dir, 'server.pid') }
 
     # Disable auto_stop to avoid accumulation of at_exit hooks during tests
-    let(:runner) do
+    let(:client) do
       described_class.new(
-        script_path,
+        script_path: script_path,
         socket_path: socket_path,
         pid_path: pid_path,
-        command: 'node',
+        runner: Exots::Runner::Node,
         auto_stop: false
       )
     end
-    let(:context) { runner.start }
+    let(:context) { client.start }
 
     after do
-      runner.stop
+      client.stop
       FileUtils.rm_rf(tmp_dir) if File.directory?(tmp_dir)
     end
 
@@ -60,13 +60,13 @@ RSpec.describe Exots::Runner do
 
     it 'cleans up the process on stop' do
       context # ensure started
-      pid = runner.pid
+      pid = client.pid
       expect(pid).not_to be_nil
 
       # Check process exists
       expect { Process.getpgid(pid) }.not_to raise_error
 
-      runner.stop
+      client.stop
 
       # Check process is gone
       expect { Process.getpgid(pid) }.to raise_error(Errno::ESRCH)
@@ -75,19 +75,19 @@ RSpec.describe Exots::Runner do
     it 'creates a pid file' do
       context # ensure started
       expect(File.exist?(pid_path)).to be true
-      expect(File.read(pid_path).to_i).to eq(runner.pid)
+      expect(File.read(pid_path).to_i).to eq(client.pid)
     end
 
     describe 'Lazy Loading' do
       it 'starts lazily on call' do
-        expect(runner.instance_variable_get(:@running)).to be false
-        expect(runner.call('ping')).to eq('pong')
-        expect(runner.instance_variable_get(:@running)).to be true
+        expect(client.instance_variable_get(:@running)).to be false
+        expect(client.call('ping')).to eq('pong')
+        expect(client.instance_variable_get(:@running)).to be true
       end
 
       it 'start is idempotent' do
-        context1 = runner.start
-        context2 = runner.start
+        context1 = client.start
+        context2 = client.start
         expect(context1).to eq(context2)
       end
     end
