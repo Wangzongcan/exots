@@ -1,6 +1,7 @@
 import * as fs from "node:fs"
 import * as http from "node:http"
 import * as net from "node:net"
+import minimist from "minimist"
 import { JSONRPCServer } from "json-rpc-2.0"
 
 export interface ListenOptions {
@@ -26,6 +27,24 @@ export class Server {
     const stop = () => this.stop()
     process.on("SIGINT", stop)
     process.on("SIGTERM", stop)
+  }
+
+  async run(argv: string[]) {
+    const args = minimist(argv.slice(2))
+    const socket = args.socket || process.env.EXOTS_SOCKET
+    const pid = args.pid || process.env.EXOTS_PID
+
+    if (!socket) {
+      console.error("Socket path required via --socket or EXOTS_SOCKET")
+      process.exit(1)
+    }
+
+    try {
+      await this.listen({ socket, pid })
+    } catch (err) {
+      console.error(err)
+      process.exit(1)
+    }
   }
 
   async listen(opts: ListenOptions) {

@@ -12,10 +12,5 @@ const server = new Server({
   }
 });
 
-server.listen({
-  socket: process.env.EXOTS_SOCKET,
-  pid: process.env.EXOTS_PID
-}).catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+server.run(process.argv);
+ 
