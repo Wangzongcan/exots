@@ -1,6 +1,6 @@
 {
   "name": "exots",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "High-performance IPC bridge for executing TypeScript/JavaScript functions from Ruby",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
