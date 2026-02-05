@@ -1,9 +1,5 @@
 # Exots
 
-> **⚠️ Status: Work in Progress**
->
-> This project is currently under active development. APIs and features are subject to change.
-
 **Exots** (Exo-Typescript) is a high-performance Inter-Process Communication (IPC) bridge designed to allow Ruby applications to seamlessly invoke functions written in TypeScript/JavaScript.
 
 It acts as a **process manager** that spawns a Node.js (or Bun/Deno) runtime and communicates via **JSON-RPC 2.0** over **HTTP** on **Unix Domain Sockets (UDS)**. This approach ensures high performance and security by avoiding local TCP ports and leveraging file-system-level access control.
