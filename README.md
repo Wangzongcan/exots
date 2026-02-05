@@ -4,68 +4,83 @@
 >
 > This project is currently under active development. APIs and features are subject to change.
 
-**Exots** (Exo-Typescript) is a high-performance Inter-Process Communication (IPC) bridge designed to allow Ruby applications to seamlessly invoke functions written in TypeScript.
+**Exots** (Exo-Typescript) is a high-performance Inter-Process Communication (IPC) bridge designed to allow Ruby applications to seamlessly invoke functions written in TypeScript/JavaScript.
 
-It utilizes **JSON-RPC 2.0** over **HTTP** running on **Unix Domain Sockets (UDS)**. This approach ensures high performance and security by avoiding local TCP ports and leveraging file-system-level access control.
+It acts as a **process manager** that spawns a Node.js (or Bun/Deno) runtime and communicates via **JSON-RPC 2.0** over **HTTP** on **Unix Domain Sockets (UDS)**. This approach ensures high performance and security by avoiding local TCP ports and leveraging file-system-level access control.
 
 ## Architecture
 
-The system consists of two main components communicating via a Unix Domain Socket file:
+The system operates on a Host/Plugin model:
 
-1.  **Server (TypeScript/Node.js)**: Imports the `exots` npm package. It wraps a set of TypeScript functions and exposes them via an HTTP server listening exclusively on a `.sock` file.
-2.  **Client (Ruby)**: Imports the `exots` gem. It connects to the `.sock` file and proxies Ruby method calls to the remote TypeScript functions using JSON-RPC.
+1.  **Host (Ruby)**: The `exots` gem manages the lifecycle of the JavaScript process. It creates a temporary communication socket and injects its path into the child process.
+2.  **Plugin (TypeScript/Node.js)**: The `exots` npm package wraps your functions and exposes them via an HTTP server listening on the injected socket path.
 
 ## Components
 
-### NPM Package
-- **Role**: RPC Server
-- **Transport**: HTTP over Unix Domain Socket
-- **Protocol**: JSON-RPC 2.0
-- **Configuration**: Accepts a map of functions and a path to a socket file.
+### NPM Package (`exots`)
+-   **Role**: RPC Server
+-   **Transport**: HTTP over Unix Domain Socket
+-   **Protocol**: JSON-RPC 2.0
+-   **Configuration**: Accepts a map of functions and listens on a socket path provided via environment variables.
 
-### Ruby Gem
-- **Role**: RPC Client
-- **Transport**: HTTP over Unix Domain Socket
-- **Features**:
-    - Automatic method proxying via `method_missing`.
-    - Converts Ruby keyword arguments/positional arguments to JSON-RPC params.
-    - Maps JSON-RPC errors to Ruby exceptions.
+### Ruby Gem (`exots`)
+-   **Role**: Process Manager & RPC Client
+-   **Features**:
+    -   Spawns and manages the Node.js/Bun process.
+    -   Automatic socket path generation and handshake.
+    -   Zero-dependency HTTP client over Unix Sockets.
+    -   Maps JSON-RPC errors to Ruby exceptions.
 
 ## Usage Example
 
-### TypeScript Side
-```typescript
+### 1. TypeScript Side (`plugin.js`)
+Create a script that exports your functions.
+
+```javascript
 import { Server } from 'exots'
 
 // 1. Initialize the server with exposed functions
 const server = new Server({
-  add: (params: { a: number; b: number }) => params.a + params.b,
-  render: async (props: any) => {
-    // Perform complex operations
-    return `<div>${props.title}</div>`
+  add: ({ a, b }) => a + b,
+  render: async ({ title }) => {
+    // Perform complex operations, e.g., SSR
+    return `<div>${title}</div>`
   }
 })
 
-// 2. Start listening
+// 2. Start listening using injected environment variables
 server.listen({
-  socket: '/tmp/exots.sock',
-  pid: '/tmp/exots.pid'
+  socket: process.env.EXOTS_SOCKET,
+  pid: process.env.EXOTS_PID
 }).then(() => {
-  console.log('RPC Server listening on /tmp/exots.sock')
+  console.log('RPC Server ready')
 })
 ```
 
-### Ruby Side
+### 2. Ruby Side
+Use the runner to spawn the process and call functions.
+
 ```ruby
 require 'exots'
 
-# Connect to the socket
-client = Exots::Client.new('/tmp/exots.sock')
+# 1. Initialize the runner (defaults to using 'node')
+runner = Exots::Runner.new("plugin.js", command: "node")
 
-# Call functions transparently
-result = client.add(1, 2)
-# => 3
+begin
+  # 2. Start the process and connect
+  context = runner.start
 
-html = client.render_component({ title: "Hello" })
-# => "<html>...</html>"
+  # 3. Call functions transparently
+  sum = context.call("add", a: 5, b: 3)
+  puts "Sum: #{sum}" 
+  # => Sum: 8
+
+  html = context.call("render", title: "Hello World")
+  puts "HTML: #{html}"
+  # => HTML: <div>Hello World</div>
+
+ensure
+  # 4. Clean shutdown
+  runner.stop
+end
 ```
